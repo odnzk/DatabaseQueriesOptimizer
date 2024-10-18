@@ -7,6 +7,6 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <editorFactoryListener implementation="kpfu.itis.odenezhkina.databasequeriesoptimizer.di.DatabaseQueriesOptimizerEditorFactoryListener"/>
-<!--        <editorFactoryMouseListener implementation="kpfu.itis.odenezhkina.databasequeriesoptimizer.plugin.SqlQueriesListener"/>-->
+        <codeInsight.lineMarkerProvider language="" implementationClass="kpfu.itis.odenezhkina.databasequeriesoptimizer.plugin.OptimizeSQLQueryMarkerProvider"/>
     </extensions>
 </idea-plugin>
