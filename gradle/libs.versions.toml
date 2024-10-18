@@ -1,0 +1,15 @@
+[versions]
+kotlin-version = "2.0.0"
+antlr-version = "4.13.2"
+
+[libraries]
+# TODO() format
+sqlite = "androidx.sqlite:sqlite:2.4.0"
+kotlin = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin-version" }
+antlr-runtime = { group = "org.antlr", name = "antlr4-runtime", version.ref = "antlr-version" }
+antlr-tool = { group = "org.antlr", name = "antlr4", version.ref = "antlr-version" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }
+antlr = { id = "antlr" }
+
