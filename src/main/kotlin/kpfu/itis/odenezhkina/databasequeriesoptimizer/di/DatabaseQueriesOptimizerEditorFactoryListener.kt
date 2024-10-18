@@ -1,6 +1,9 @@
 package kpfu.itis.odenezhkina.databasequeriesoptimizer.di
 
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.editor.CaretModel
+import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.event.CaretListener
 import com.intellij.openapi.editor.event.EditorFactoryEvent
 import com.intellij.openapi.editor.event.EditorFactoryListener
 import com.intellij.openapi.editor.event.EditorMouseListener
@@ -13,40 +16,54 @@ import kpfu.itis.odenezhkina.databasequeriesoptimizer.plugin.SqlQueriesListener
 
 class DatabaseQueriesOptimizerEditorFactoryListener : EditorFactoryListener {
 
+    private val store: HashMap<Class<*>, Any> = HashMap()
+
     override fun editorCreated(event: EditorFactoryEvent) {
-        with(event.editor){
-            addEditorMouseListener(provideOnDatabaseQueriesHoverListener())
-            caretModel.addCaretListener(provideSelectedTextListener())
-        }
+        registerSQLQueriesListener(event.editor)
+        registerSelectedTextListener(event.editor.caretModel)
     }
 
     override fun editorReleased(event: EditorFactoryEvent) {
-        //TODO("how to clean")
-//        event.editor.removeEditorMouseListener()
+        store.values.forEach { value ->
+            when(value){
+                is EditorMouseListener -> {
+                    event.editor.removeEditorMouseListener(value)
+                }
+                is CaretListener ->{
+                    event.editor.caretModel.removeCaretListener(value)
+                }
+            }
+        }
     }
 
-    private fun provideSelectedTextListener(): SelectedTextListener {
+    private fun registerSelectedTextListener(caretModel: CaretModel) {
         val sqlQueryParser = AntrlSqlQueryParser(
             Logger.getInstance(AntrlSqlQueryParser::class.java),
             errorListenerProvider = { SimpleAntlrErrorListener() }
         )
-        return SelectedTextListener(
+        val listener = SelectedTextListener(
             sqlQueryParser = sqlQueryParser,
             tooltipRender = SqlQueryTooltipRender(),
             sqlTreeVisualizer = TextTreeVisualizer(),
         )
+
+        store[SelectedTextListener::class.java] = listener
+        caretModel.addCaretListener(listener)
     }
 
-    private fun provideOnDatabaseQueriesHoverListener(): EditorMouseListener {
+    private fun registerSQLQueriesListener(editor: Editor){
         val sqlQueryParser = AntrlSqlQueryParser(
             Logger.getInstance(AntrlSqlQueryParser::class.java),
             errorListenerProvider = { SimpleAntlrErrorListener() }
         )
-        return SqlQueriesListener.create(
+        val listener = SqlQueriesListener.create(
             sqlQueryParser = sqlQueryParser,
             logger = Logger.getInstance(SqlQueriesListener::class.java),
             tooltipRender = SqlQueryTooltipRender(),
             sqlTreeVisualizer = TextTreeVisualizer(),
         )
+
+        store[SqlQueriesListener::class.java] = listener
+        editor.addEditorMouseListener(listener)
     }
 }
