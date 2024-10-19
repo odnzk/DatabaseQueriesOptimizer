@@ -1,4 +1,4 @@
-package kpfu.itis.odenezhkina.databasequeriesoptimizer.features.queryParser.api
+package kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.api
 
 data class SyntaxTree(
     val rootNode: TreeNode,

@@ -2,7 +2,7 @@ package kpfu.itis.odenezhkina.databasequeriesoptimizer.features.performanceAnaly
 
 import SQLiteParser
 import SQLiteParserBaseVisitor
-import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.queryParser.api.SyntaxTree
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.api.SyntaxTree
 
 class SelectAllUsageAnalyser : ConditionAnalyser {
 

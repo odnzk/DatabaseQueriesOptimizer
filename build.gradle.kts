@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     alias(libs.plugins.kotlin.jvm)
     id(libs.plugins.antlr.get().pluginId)
-    id("org.jetbrains.intellij") version "1.16.1" // TODO()
+    alias(libs.plugins.intellij)
 }
 
 group = "kpfu.itis.odenezhkina"
@@ -15,8 +15,8 @@ repositories {
 
 intellij {
     version.set("2023.1.5")
-    type.set("IC")
-    plugins.set(listOf(/* Plugin Dependencies */))
+    type.set("IU")
+    plugins.set(listOf("com.intellij.database", "org.jetbrains.kotlin"))
 }
 
 tasks {
@@ -56,4 +56,7 @@ tasks.generateGrammarSource {
 
 tasks.withType<KotlinCompile>().configureEach {
     inputs.files(tasks.named("generateGrammarSource"))
+}
+tasks.withType<KotlinCompile>().configureEach {
+    inputs.files(tasks.named("generateTestGrammarSource"))
 }

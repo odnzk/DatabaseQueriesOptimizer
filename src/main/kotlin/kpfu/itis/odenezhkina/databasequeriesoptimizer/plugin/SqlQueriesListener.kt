@@ -9,8 +9,8 @@ import com.intellij.openapi.editor.event.EditorMouseEvent
 import com.intellij.openapi.editor.event.EditorMouseListener
 import com.intellij.openapi.util.TextRange
 import com.intellij.ui.awt.RelativePoint
-import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.queryParser.api.SqlQueryParser
-import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.queryParser.api.SyntaxTree
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.api.SqlQueryParser
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.api.SyntaxTree
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tooltip.SqlQueryTooltipRender
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.visualization.api.TreeVisualizer
 
@@ -57,7 +57,7 @@ class SqlQueriesListener(
 
         // Parse the full SQL query using ANTLR
         val sqlText = document.text  // Get full document text
-        return sqlQueryParser.parse(sqlText)  // Assume parseSql is your ANTLR parser function
+        return sqlQueryParser.buildTreee(sqlText)  // Assume parseSql is your ANTLR parser function
     }
 
     private fun calcTooltipPosition(editor: Editor): RelativePoint {

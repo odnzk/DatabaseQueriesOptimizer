@@ -1,32 +1,33 @@
-package kpfu.itis.odenezhkina.databasequeriesoptimizer.features.queryParser.impl
+package kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.impl
 
 import SQLiteLexer
 import SQLiteParser
 import com.intellij.openapi.diagnostic.Logger
-import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.queryParser.api.SqlQueryParser
-import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.queryParser.api.SyntaxTree
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.api.SqlQueryParser
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.api.SyntaxTree
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.tree.ParseTree
 import org.antlr.v4.runtime.tree.TerminalNode
 
-class AntrlSqlQueryParser(
+class SqlQueryParserImpl(
     private val logger: Logger,
     private val errorListenerProvider: () -> SqlQueryParserErrorListener,
 ) : SqlQueryParser {
 
-    override fun parse(rawQuery: String): SyntaxTree? {
+    // TODO() unite somehow with validator
+    override fun buildTreee(rawQuery: String): SyntaxTree? {
         return try {
             val charStream = CharStreams.fromString(rawQuery)
             val lexer = SQLiteLexer(charStream)
+            val listener = errorListenerProvider()
             val tokens = CommonTokenStream(lexer)
 
-            val listener = errorListenerProvider()
             val parser = SQLiteParser(tokens).apply {
                 addErrorListener(listener)
             }
 
-            val tree = parser.sql_stmt_list()
+            val tree = parser.sql_stmt()
 
             if (listener.hasError) {
                 null

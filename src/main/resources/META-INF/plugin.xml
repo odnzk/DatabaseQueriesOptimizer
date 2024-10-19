@@ -4,9 +4,11 @@
 
     <vendor email="support@odenezhka.com" url="https://www.yourcompany.com">ODenezhka</vendor>
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.database</depends>
+    <depends>org.jetbrains.kotlin</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <editorFactoryListener implementation="kpfu.itis.odenezhkina.databasequeriesoptimizer.di.DatabaseQueriesOptimizerEditorFactoryListener"/>
-        <codeInsight.lineMarkerProvider language="" implementationClass="kpfu.itis.odenezhkina.databasequeriesoptimizer.plugin.OptimizeSQLQueryMarkerProvider"/>
+        <postStartupActivity implementation="kpfu.itis.odenezhkina.databasequeriesoptimizer.di.DatabaseQueriesOptimizerStartActivity"/>
     </extensions>
 </idea-plugin>

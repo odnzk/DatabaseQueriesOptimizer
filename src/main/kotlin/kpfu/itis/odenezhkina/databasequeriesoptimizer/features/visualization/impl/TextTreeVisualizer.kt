@@ -1,6 +1,6 @@
 package kpfu.itis.odenezhkina.databasequeriesoptimizer.features.visualization.impl
 
-import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.queryParser.api.SyntaxTree
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.api.SyntaxTree
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.visualization.api.TreeVisualizer
 
 class TextTreeVisualizer : TreeVisualizer {

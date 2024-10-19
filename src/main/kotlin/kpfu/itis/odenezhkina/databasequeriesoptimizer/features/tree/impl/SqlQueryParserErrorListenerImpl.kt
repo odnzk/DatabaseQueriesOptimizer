@@ -1,4 +1,4 @@
-package kpfu.itis.odenezhkina.databasequeriesoptimizer.features.queryParser.impl
+package kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.impl
 
 import org.antlr.v4.runtime.ANTLRErrorListener
 import org.antlr.v4.runtime.Parser
@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.RecognitionException
 import org.antlr.v4.runtime.Recognizer
 import org.antlr.v4.runtime.atn.ATNConfigSet
 import org.antlr.v4.runtime.dfa.DFA
-import java.util.*
+import java.util.BitSet
 
 sealed interface SqlQueryParserError {
     class Syntax(val message: String?) : SqlQueryParserError
@@ -16,9 +16,13 @@ sealed interface SqlQueryParserError {
 interface SqlQueryParserErrorListener : ANTLRErrorListener {
     val hasError: Boolean
     fun containsSpecificError(error: SqlQueryParserError) : Boolean
+
+    companion object{
+        fun create(): SqlQueryParserErrorListener = SqlQueryParserErrorListenerImpl()
+    }
 }
 
-class SimpleAntlrErrorListener : SqlQueryParserErrorListener {
+class SqlQueryParserErrorListenerImpl : SqlQueryParserErrorListener {
 
     private val errors: HashMap<Class<*>, SqlQueryParserError> = hashMapOf()
 
@@ -68,7 +72,8 @@ class SimpleAntlrErrorListener : SqlQueryParserErrorListener {
         conflictingAlts: BitSet?,
         configs: ATNConfigSet?
     ) {
-        errors[SqlQueryParserError.ResolvingAmbiguity::class.java] = SqlQueryParserError.ResolvingAmbiguity
+        //conflictingAlts
+        //errors[SqlQueryParserError.ResolvingAmbiguity::class.java] = SqlQueryParserError.ResolvingAmbiguity
     }
 
     /*
