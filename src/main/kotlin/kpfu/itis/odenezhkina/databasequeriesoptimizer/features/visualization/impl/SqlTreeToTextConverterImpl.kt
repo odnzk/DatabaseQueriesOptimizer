@@ -1,6 +1,6 @@
 package kpfu.itis.odenezhkina.databasequeriesoptimizer.features.visualization.impl
 
-import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.api.SqlSyntaxTree
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.common.SqlSyntaxTree
 
 // TODO() write tests or?
 class SqlTreeToTextConverterImpl {

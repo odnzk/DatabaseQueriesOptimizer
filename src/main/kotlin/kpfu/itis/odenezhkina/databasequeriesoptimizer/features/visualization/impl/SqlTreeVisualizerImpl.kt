@@ -3,7 +3,7 @@ package kpfu.itis.odenezhkina.databasequeriesoptimizer.features.visualization.im
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.treeStructure.Tree
-import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.api.SqlSyntaxTree
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.common.SqlSyntaxTree
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.visualization.api.SqlTreeVisualizer
 import java.awt.BorderLayout
 import java.awt.Dimension

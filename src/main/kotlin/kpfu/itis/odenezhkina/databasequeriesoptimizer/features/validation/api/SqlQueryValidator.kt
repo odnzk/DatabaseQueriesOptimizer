@@ -1,7 +1,7 @@
 package kpfu.itis.odenezhkina.databasequeriesoptimizer.features.validation.api
 
-import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.api.SqlSyntaxTree
-import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.impl.SqlQueryParserErrorListener
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.common.SqlSyntaxTree
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.common.SqlQueryParserErrorListener
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.validation.SqlQueryValidatorImpl
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.validation.SqlSyntaxTreeConverter
 

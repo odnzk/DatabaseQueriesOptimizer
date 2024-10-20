@@ -7,7 +7,7 @@ import com.intellij.openapi.util.IconLoader
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiEditorUtil
 import com.intellij.util.ui.UIUtil
-import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.api.SqlSyntaxTree
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.common.SqlSyntaxTree
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.validation.api.SqlQueryValidator
 import org.jetbrains.kotlin.psi.KtStringTemplateEntry
 import javax.swing.Icon
@@ -18,8 +18,7 @@ private const val MARKER_ACCESSIBILITY_DESCRIPTION = "SQL optimizer icon"
 class OptimizeSQLQueryMarkerProvider(
     private val validator: SqlQueryValidator,
     private val popupRenderer: PluginActionsPopupRender,
-) :
-    LineMarkerProvider {
+) : LineMarkerProvider {
 
     private sealed interface ParsedSyntaxTreeResult {
         data class Success(val tree: SqlSyntaxTree) : ParsedSyntaxTreeResult

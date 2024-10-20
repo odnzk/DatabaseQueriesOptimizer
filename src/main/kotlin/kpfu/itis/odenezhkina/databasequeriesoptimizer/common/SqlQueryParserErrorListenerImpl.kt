@@ -1,4 +1,4 @@
-package kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.impl
+package kpfu.itis.odenezhkina.databasequeriesoptimizer.common
 
 import com.intellij.openapi.diagnostic.Logger
 import org.antlr.v4.runtime.ANTLRErrorListener
@@ -19,7 +19,8 @@ interface SqlQueryParserErrorListener : ANTLRErrorListener {
     fun containsSpecificError(error: SqlQueryParserError): Boolean
 
     companion object {
-        fun create(): SqlQueryParserErrorListener = SqlQueryParserErrorListenerImpl(Logger.getInstance(SqlQueryParserErrorListenerImpl::class.java))
+        fun create(): SqlQueryParserErrorListener = SqlQueryParserErrorListenerImpl(Logger.getInstance(
+            SqlQueryParserErrorListenerImpl::class.java))
     }
 }
 

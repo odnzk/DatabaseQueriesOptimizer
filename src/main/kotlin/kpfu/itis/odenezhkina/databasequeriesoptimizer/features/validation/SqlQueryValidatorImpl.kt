@@ -3,8 +3,8 @@ package kpfu.itis.odenezhkina.databasequeriesoptimizer.features.validation
 
 import SQLiteLexer
 import SQLiteParser
-import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.api.SqlSyntaxTree
-import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.impl.SqlQueryParserErrorListener
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.common.SqlSyntaxTree
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.common.SqlQueryParserErrorListener
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.validation.api.SqlQueryValidator
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
