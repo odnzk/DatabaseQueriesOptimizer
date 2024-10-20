@@ -2,50 +2,53 @@ package kpfu.itis.odenezhkina.databasequeriesoptimizer.plugin
 
 import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.codeInsight.daemon.LineMarkerProvider
-import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.markup.GutterIconRenderer
-import com.intellij.openapi.ui.popup.JBPopup
-import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.util.IconLoader
 import com.intellij.psi.PsiElement
-import com.intellij.psi.util.PsiUtilBase
-import com.intellij.sql.psi.SqlFile
-import com.intellij.sql.psi.SqlStatement
+import com.intellij.psi.util.PsiEditorUtil
 import com.intellij.util.ui.UIUtil
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.api.SqlSyntaxTree
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.validation.api.SqlQueryValidator
 import org.jetbrains.kotlin.psi.KtStringTemplateEntry
 import javax.swing.Icon
 
 private const val MARKER_TITLE = "Optimize SQL Query"
 private const val MARKER_ACCESSIBILITY_DESCRIPTION = "SQL optimizer icon"
-private const val ACTIONS_POPUP_TITLE = "Choose action"
-private const val ACTION_OPTIMIZE_QUERY = "Optimize"
-private const val ACTION_SHOW_SQL_TREE = "Show SQL tree"
 
-class OptimizeSQLQueryMarkerProvider(private val validator: SqlQueryValidator) :
+class OptimizeSQLQueryMarkerProvider(
+    private val validator: SqlQueryValidator,
+    private val popupRenderer: PluginActionsPopupRender,
+) :
     LineMarkerProvider {
 
-    private val alreadyParsedCache = mutableMapOf<String, Boolean>()
+    private sealed interface ParsedSyntaxTreeResult {
+        data class Success(val tree: SqlSyntaxTree) : ParsedSyntaxTreeResult
+        data object Failure : ParsedSyntaxTreeResult
+    }
+
+    private val alreadyParsedCache = mutableMapOf<String, ParsedSyntaxTreeResult>()
 
     override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<*>? {
         return when (element) {
-            is SqlFile, is SqlStatement -> {
-                buildLineMarkerInfo(element)
-            }
-
             is KtStringTemplateEntry -> {
                 val text: String? = element.text
                 if (text.isNullOrBlank()) return null
-                when (alreadyParsedCache[text]) {
-                    true -> return buildLineMarkerInfo(element)
-                    false -> return null
+                when (val cached = alreadyParsedCache[text]) {
+                    is ParsedSyntaxTreeResult.Success -> return buildLineMarkerInfo(element, cached.tree)
+                    ParsedSyntaxTreeResult.Failure -> return null
                     null -> Unit
                 }
 
-                val isSql = validator.isSql(text)
-                alreadyParsedCache[text] = isSql
-                if (isSql) {
-                    buildLineMarkerInfo(element)
+                val syntaxTreeResult = validator.parseToTree(text).let { parsedTree ->
+                    if (parsedTree != null) {
+                        ParsedSyntaxTreeResult.Success(parsedTree)
+                    } else {
+                        ParsedSyntaxTreeResult.Failure
+                    }
+                }
+                alreadyParsedCache[text] = syntaxTreeResult
+                if (syntaxTreeResult is ParsedSyntaxTreeResult.Success) {
+                    buildLineMarkerInfo(element, syntaxTreeResult.tree)
                 } else {
                     null
                 }
@@ -55,15 +58,15 @@ class OptimizeSQLQueryMarkerProvider(private val validator: SqlQueryValidator) :
         }
     }
 
-    private fun buildLineMarkerInfo(element: PsiElement) = LineMarkerInfo(
+    private fun buildLineMarkerInfo(element: PsiElement, sqlSyntaxTree: SqlSyntaxTree) = LineMarkerInfo(
         element,
         element.textRange,
         getThemeAwareIcon(),
         { MARKER_TITLE },
         { _, elt ->
-            val editor = PsiUtilBase.findEditor(elt)
+            val editor = PsiEditorUtil.findEditor(element)
             if (editor != null) {
-                showActionsPopup(elt, editor)
+                popupRenderer.showActionsPopup(elt, editor, sqlSyntaxTree)
             }
         },
         GutterIconRenderer.Alignment.RIGHT,
@@ -75,33 +78,6 @@ class OptimizeSQLQueryMarkerProvider(private val validator: SqlQueryValidator) :
             IconLoader.getIcon("/icons/manageDataSources.svg", javaClass)
         } else {
             IconLoader.getIcon("/icons/manageDataSources_dark.svg", javaClass)
-        }
-    }
-
-    private fun showActionsPopup(element: PsiElement, editor: Editor) {
-        val actions = listOf(ACTION_OPTIMIZE_QUERY, ACTION_SHOW_SQL_TREE)
-
-        val popup: JBPopup = JBPopupFactory.getInstance()
-            .createPopupChooserBuilder(actions)
-            .setTitle(ACTIONS_POPUP_TITLE)
-            .setMovable(false)
-            .setItemChosenCallback { selectedAction ->
-                performAction(selectedAction, element)
-            }
-            .createPopup()
-
-        popup.showInBestPositionFor(editor)
-    }
-
-    private fun performAction(action: String, element: PsiElement) {
-        when (action) {
-            ACTION_OPTIMIZE_QUERY -> {
-                // TODO()
-            }
-
-            ACTION_SHOW_SQL_TREE -> {
-                // TODO()
-            }
         }
     }
 

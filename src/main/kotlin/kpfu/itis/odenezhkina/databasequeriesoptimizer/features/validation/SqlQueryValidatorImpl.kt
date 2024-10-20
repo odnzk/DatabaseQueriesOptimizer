@@ -3,15 +3,18 @@ package kpfu.itis.odenezhkina.databasequeriesoptimizer.features.validation
 
 import SQLiteLexer
 import SQLiteParser
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.api.SqlSyntaxTree
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.impl.SqlQueryParserErrorListener
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.validation.api.SqlQueryValidator
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 
-class SqlQueryValidatorImpl(private val errorListenerProvider: () -> SqlQueryParserErrorListener) :
-    SqlQueryValidator {
+class SqlQueryValidatorImpl(
+    private val treeConverter: SqlSyntaxTreeConverter,
+    private val errorListenerProvider: () -> SqlQueryParserErrorListener,
+) : SqlQueryValidator {
 
-    override fun isSql(query: String): Boolean {
+    override fun parseToTree(query: String): SqlSyntaxTree? {
         return try {
             val input = CharStreams.fromString(query)
             val lexer = SQLiteLexer(input)
@@ -20,16 +23,20 @@ class SqlQueryValidatorImpl(private val errorListenerProvider: () -> SqlQueryPar
             lexer.addErrorListener(errorListener)
             val tokens = CommonTokenStream(lexer)
             tokens.fill()
-            if (errorListener.hasError) return false
+            if (errorListener.hasError) return null
 
             val parser = SQLiteParser(tokens).apply {
                 addErrorListener(errorListener)
             }
             val tree = parser.sql_stmt()
 
-            !(errorListener.hasError || tree == null)
+            if (errorListener.hasError || tree == null) {
+                null
+            } else {
+                treeConverter.convert(tree, parser)
+            }
         } catch (e: Exception) {
-            false
+            null
         }
     }
 }

@@ -1,5 +1,6 @@
 package kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.impl
 
+import com.intellij.openapi.diagnostic.Logger
 import org.antlr.v4.runtime.ANTLRErrorListener
 import org.antlr.v4.runtime.Parser
 import org.antlr.v4.runtime.RecognitionException
@@ -15,21 +16,22 @@ sealed interface SqlQueryParserError {
 
 interface SqlQueryParserErrorListener : ANTLRErrorListener {
     val hasError: Boolean
-    fun containsSpecificError(error: SqlQueryParserError) : Boolean
+    fun containsSpecificError(error: SqlQueryParserError): Boolean
 
-    companion object{
-        fun create(): SqlQueryParserErrorListener = SqlQueryParserErrorListenerImpl()
+    companion object {
+        fun create(): SqlQueryParserErrorListener = SqlQueryParserErrorListenerImpl(Logger.getInstance(SqlQueryParserErrorListenerImpl::class.java))
     }
 }
 
-class SqlQueryParserErrorListenerImpl : SqlQueryParserErrorListener {
+class SqlQueryParserErrorListenerImpl(private val logger: Logger) : SqlQueryParserErrorListener {
 
     private val errors: HashMap<Class<*>, SqlQueryParserError> = hashMapOf()
 
     override val hasError: Boolean
         get() = errors.isNotEmpty()
 
-    override fun containsSpecificError(error: SqlQueryParserError): Boolean = errors.contains(error::class.java)
+    override fun containsSpecificError(error: SqlQueryParserError): Boolean =
+        errors.contains(error::class.java)
 
     /* This method is called when the parser encounters a syntax error, such as an unexpected token or invalid input.
      This is one of the most commonly used methods in custom error listeners, as it handles typical syntax errors during parsing.
@@ -42,6 +44,7 @@ class SqlQueryParserErrorListenerImpl : SqlQueryParserErrorListener {
         msg: String?,
         e: RecognitionException?
     ) {
+        logger.warn("Syntax error $e ($msg) at line $line and charPosition $charPositionInLine")
         errors[SqlQueryParserError.Syntax::class.java] = SqlQueryParserError.Syntax(msg)
     }
 

@@ -1,6 +1,6 @@
 package kpfu.itis.odenezhkina.databasequeriesoptimizer.features.tree.api
 
-data class SyntaxTree(
+data class SqlSyntaxTree(
     val rootNode: TreeNode,
 ) {
 
@@ -13,7 +13,5 @@ data class SyntaxTree(
         ) : TreeNode
 
         data class Leaf(override val name: String) : TreeNode
-
-        data class System(override val name: String) : TreeNode
     }
 }

@@ -11,7 +11,7 @@ class SqlQueryValidatorTest {
     fun `GIVEN raw sql query WHEN query is valid THEN return true`(){
         val data = "SELECT * from someTable"
 
-        val actual = validator.isSql(data)
+        val actual = validator.parseToTree(data)
 
         Assert.assertEquals(true, actual)
     }
@@ -20,7 +20,7 @@ class SqlQueryValidatorTest {
     fun `GIVEN raw sql query WHEN query is not valid THEN return true`(){
         val data = "SELECT * from someTable *"
 
-        val actual = validator.isSql(data)
+        val actual = validator.parseToTree(data)
 
         Assert.assertEquals(true, actual)
     }
@@ -29,7 +29,7 @@ class SqlQueryValidatorTest {
     fun `GIVEN raw sql query WHEN query contains brackets THEN return true`(){
         val data = "SELECT * from sometable WHERE somecolumn='testcolumn'"
 
-        val actual = validator.isSql(data)
+        val actual = validator.parseToTree(data)
 
         Assert.assertEquals(true, actual)
     }
@@ -38,7 +38,7 @@ class SqlQueryValidatorTest {
     fun `GIVEN text THEN return false`(){
         val data = "text text"
 
-        val actual = validator.isSql(data)
+        val actual = validator.parseToTree(data)
 
         Assert.assertEquals(false, actual)
     }
@@ -47,7 +47,7 @@ class SqlQueryValidatorTest {
     fun `GIVEN digits THEN return false`(){
         val data = "1234581291093"
 
-        val actual = validator.isSql(data)
+        val actual = validator.parseToTree(data)
 
         Assert.assertEquals(false, actual)
     }
@@ -56,7 +56,7 @@ class SqlQueryValidatorTest {
     fun `GIVEN symbols THEN return false`(){
         val data = "%$*"
 
-        val actual = validator.isSql(data)
+        val actual = validator.parseToTree(data)
 
         Assert.assertEquals(false, actual)
     }
