@@ -62,10 +62,10 @@ class OptimizeSQLQueryMarkerProvider(
         element.textRange,
         getThemeAwareIcon(),
         { MARKER_TITLE },
-        { _, elt ->
+        { _, _ ->
             val editor = PsiEditorUtil.findEditor(element)
             if (editor != null) {
-                popupRenderer.showActionsPopup(elt, editor, sqlSyntaxTree)
+                popupRenderer.showActionsPopup(editor, sqlSyntaxTree)
             }
         },
         GutterIconRenderer.Alignment.RIGHT,

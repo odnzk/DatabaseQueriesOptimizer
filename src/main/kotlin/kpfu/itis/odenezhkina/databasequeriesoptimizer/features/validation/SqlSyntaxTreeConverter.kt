@@ -14,7 +14,7 @@ interface SqlSyntaxTreeConverter {
     }
 }
 
-class SqlSyntaxTreeConverterImpl : SqlSyntaxTreeConverter {
+private class SqlSyntaxTreeConverterImpl : SqlSyntaxTreeConverter {
 
     override fun convert(parsedTree: ParseTree, parser: Parser): SqlSyntaxTree {
         return SqlSyntaxTree(visitNode(parsedTree, parser))

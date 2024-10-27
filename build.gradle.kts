@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.kotlin)
     implementation(libs.antlr.runtime)
     antlr(libs.antlr.tool)
+    implementation(libs.apache.calcite)
 }
 
 tasks.generateGrammarSource {

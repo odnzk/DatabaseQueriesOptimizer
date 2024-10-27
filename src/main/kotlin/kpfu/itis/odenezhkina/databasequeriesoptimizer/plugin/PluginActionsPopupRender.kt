@@ -1,10 +1,11 @@
 package kpfu.itis.odenezhkina.databasequeriesoptimizer.plugin
 
+import com.intellij.codeInsight.hint.HintManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
-import com.intellij.psi.PsiElement
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.common.SqlSyntaxTree
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.optimization.SqlQueryOptimizer
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.visualization.api.SqlTreeVisualizer
 
 private const val ACTIONS_POPUP_TITLE = "Choose action"
@@ -13,21 +14,29 @@ private const val ACTION_SHOW_SQL_TREE = "Show SQL tree"
 
 interface PluginActionsPopupRender {
 
-    fun showActionsPopup(element: PsiElement, editor: Editor, sqlSyntaxTree: SqlSyntaxTree)
+    fun showActionsPopup(
+        editor: Editor,
+        sqlSyntaxTree: SqlSyntaxTree,
+    )
 
     companion object {
         fun create(): PluginActionsPopupRender =
-            PluginActionsPopupRenderImpl(sqlTreeVisualizer = SqlTreeVisualizer.create())
+            PluginActionsPopupRenderImpl(
+                sqlTreeVisualizer = SqlTreeVisualizer.create(),
+                sqlQueryOptimizer = SqlQueryOptimizer.create(),
+            )
     }
 }
 
-class PluginActionsPopupRenderImpl(private val sqlTreeVisualizer: SqlTreeVisualizer) :
+class PluginActionsPopupRenderImpl(
+    private val sqlTreeVisualizer: SqlTreeVisualizer,
+    private val sqlQueryOptimizer: SqlQueryOptimizer,
+) :
     PluginActionsPopupRender {
 
     override fun showActionsPopup(
-        element: PsiElement,
         editor: Editor,
-        sqlSyntaxTree: SqlSyntaxTree
+        sqlSyntaxTree: SqlSyntaxTree,
     ) {
         val actions = listOf(ACTION_OPTIMIZE_QUERY, ACTION_SHOW_SQL_TREE)
 
@@ -36,21 +45,43 @@ class PluginActionsPopupRenderImpl(private val sqlTreeVisualizer: SqlTreeVisuali
             .setTitle(ACTIONS_POPUP_TITLE)
             .setMovable(false)
             .setItemChosenCallback { selectedAction ->
-                performAction(selectedAction, element, sqlSyntaxTree)
+                performAction(selectedAction, sqlSyntaxTree, editor)
             }
             .createPopup()
 
         popup.showInBestPositionFor(editor)
     }
 
-    private fun performAction(action: String, element: PsiElement, sqlSyntaxTree: SqlSyntaxTree) {
+    private fun performAction(action: String, sqlSyntaxTree: SqlSyntaxTree, editor: Editor) {
         when (action) {
             ACTION_OPTIMIZE_QUERY -> {
-                // TODO()
+                val sql = StringBuilder()
+                extractSqlQuery(sqlSyntaxTree.rootNode, sql)
+                val hintText: String =
+                    when (val optimizedQuery = sqlQueryOptimizer.optimize(sql.toString())) {
+                        SqlQueryOptimizer.OptimizationResult.Empty -> "No optimization"
+                        is SqlQueryOptimizer.OptimizationResult.Error -> optimizedQuery.e.message.orEmpty()
+                        is SqlQueryOptimizer.OptimizationResult.Success -> optimizedQuery.optimized
+                    }
+                HintManager.getInstance().showInformationHint(editor, hintText)
             }
 
             ACTION_SHOW_SQL_TREE -> {
                 sqlTreeVisualizer.visualize(sqlSyntaxTree)
+            }
+        }
+    }
+
+    private fun extractSqlQuery(node: SqlSyntaxTree.TreeNode, builder: StringBuilder) {
+        when (node) {
+            is SqlSyntaxTree.TreeNode.Leaf -> {
+                builder.append(node.name)
+            }
+
+            is SqlSyntaxTree.TreeNode.Parent -> {
+                node.children.forEach { child ->
+                    extractSqlQuery(child, builder)
+                }
             }
         }
     }
