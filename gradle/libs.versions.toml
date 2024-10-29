@@ -5,11 +5,11 @@ intellij-version = "1.16.1"
 calcite-version = "1.38.0"
 
 [libraries]
-# TODO() format
 kotlin = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin-version" }
 antlr-runtime = { group = "org.antlr", name = "antlr4-runtime", version.ref = "antlr-version" }
 antlr-tool = { group = "org.antlr", name = "antlr4", version.ref = "antlr-version" }
 apache-calcite = { group = "org.apache.calcite", name = "calcite-core", version.ref = "calcite-version" }
+apache-calcite-linq4j = { group = "org.apache.calcite", name = "calcite-linq4j", version.ref = "calcite-version" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }

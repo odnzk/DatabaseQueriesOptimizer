@@ -49,6 +49,7 @@ dependencies {
     implementation(libs.antlr.runtime)
     antlr(libs.antlr.tool)
     implementation(libs.apache.calcite)
+    implementation(libs.apache.calcite.linq4j)
 }
 
 tasks.generateGrammarSource {

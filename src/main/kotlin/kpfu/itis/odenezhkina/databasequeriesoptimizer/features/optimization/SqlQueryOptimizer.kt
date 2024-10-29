@@ -2,6 +2,8 @@ package kpfu.itis.odenezhkina.databasequeriesoptimizer.features.optimization
 
 import com.intellij.openapi.diagnostic.Logger
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.optimization.SqlQueryOptimizer.OptimizationResult
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.scheme.DatabaseSchemeLoader
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.settings.PluginSettings
 import org.apache.calcite.plan.ConventionTraitDef
 import org.apache.calcite.plan.RelOptPlanner
 import org.apache.calcite.plan.volcano.VolcanoPlanner
@@ -28,19 +30,31 @@ interface SqlQueryOptimizer {
 
     companion object {
         fun create(): SqlQueryOptimizer =
-            SqlQueryOptimizerImpl(Logger.getInstance(SqlQueryOptimizerImpl::class.java))
+            SqlQueryOptimizerImpl(
+                logger = Logger.getInstance(SqlQueryOptimizerImpl::class.java),
+                databaseSchemeLoader = DatabaseSchemeLoader()
+            )
     }
 }
 
-class SqlQueryOptimizerImpl(private val logger: Logger) : SqlQueryOptimizer {
+class SqlQueryOptimizerImpl(
+    private val logger: Logger,
+    private val databaseSchemeLoader: DatabaseSchemeLoader
+) : SqlQueryOptimizer {
 
     override fun optimize(sql: String): OptimizationResult {
-        val config: FrameworkConfig = Frameworks.newConfigBuilder().build()
-        val planner: Planner = Frameworks.getPlanner(config)
-
         return try {
+            val settingsState = PluginSettings.getInstance().state
+            val scheme = databaseSchemeLoader.loadRoomSchemeAndConvertItToCalcite(settingsState.databaseSchemePath)
+                ?: return OptimizationResult.Error(IllegalStateException("Cannot parse room scheme, check settings"))
+            val config: FrameworkConfig = Frameworks
+                .newConfigBuilder()
+                .defaultSchema(scheme)
+                .build()
+            val planner: Planner = Frameworks.getPlanner(config)
+
             val parsedTree: SqlNode = planner.parse(sql)
-                ?: return OptimizationResult.Error(IllegalStateException("Cannot parse tree fro $sql"))
+                ?: return OptimizationResult.Error(IllegalStateException("Cannot parse tree for $sql"))
             val validatedSql: SqlNode = planner.validate(parsedTree)
                 ?: return OptimizationResult.Error(IllegalStateException("Cannot validate parsed tree for $sql"))
             val relAlgRepresentation = planner.rel(validatedSql).rel

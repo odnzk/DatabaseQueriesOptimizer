@@ -10,5 +10,13 @@
     <extensions defaultExtensionNs="com.intellij">
         <editorFactoryListener implementation="kpfu.itis.odenezhkina.databasequeriesoptimizer.di.DatabaseQueriesOptimizerEditorFactoryListener"/>
         <postStartupActivity implementation="kpfu.itis.odenezhkina.databasequeriesoptimizer.di.DatabaseQueriesOptimizerStartActivity"/>
+        <applicationService serviceImplementation="kpfu.itis.odenezhkina.databasequeriesoptimizer.features.settings.PluginSettings" />
     </extensions>
+    <actions>
+        <action id="SqlAction"
+            class="kpfu.itis.odenezhkina.databasequeriesoptimizer.plugin.SqlAction"
+            text="DatabaseQueriesOptimizer">
+            <add-to-group group-id="InspectCodeGroup" anchor="first" />
+        </action>
+    </actions>
 </idea-plugin>

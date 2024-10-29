@@ -6,13 +6,14 @@ import com.intellij.openapi.editor.markup.GutterIconRenderer
 import com.intellij.openapi.util.IconLoader
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiEditorUtil
+import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.ui.UIUtil
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.common.SqlSyntaxTree
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.validation.api.SqlQueryValidator
+import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtStringTemplateEntry
 import javax.swing.Icon
 
-private const val MARKER_TITLE = "Optimize SQL Query"
 private const val MARKER_ACCESSIBILITY_DESCRIPTION = "SQL optimizer icon"
 
 class OptimizeSQLQueryMarkerProvider(
@@ -28,12 +29,21 @@ class OptimizeSQLQueryMarkerProvider(
     private val alreadyParsedCache = mutableMapOf<String, ParsedSyntaxTreeResult>()
 
     override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<*>? {
+        val ktNamedFunction =
+            PsiTreeUtil.getParentOfType(element, KtNamedFunction::class.java) ?: return null
+        if (ktNamedFunction.annotationEntries.map { it.text }
+                .any { it.equals("Query", ignoreCase = true) }) return null
+
         return when (element) {
             is KtStringTemplateEntry -> {
                 val text: String? = element.text
                 if (text.isNullOrBlank()) return null
                 when (val cached = alreadyParsedCache[text]) {
-                    is ParsedSyntaxTreeResult.Success -> return buildLineMarkerInfo(element, cached.tree)
+                    is ParsedSyntaxTreeResult.Success -> return buildLineMarkerInfo(
+                        element,
+                        cached.tree
+                    )
+
                     ParsedSyntaxTreeResult.Failure -> return null
                     null -> Unit
                 }
@@ -57,20 +67,21 @@ class OptimizeSQLQueryMarkerProvider(
         }
     }
 
-    private fun buildLineMarkerInfo(element: PsiElement, sqlSyntaxTree: SqlSyntaxTree) = LineMarkerInfo(
-        element,
-        element.textRange,
-        getThemeAwareIcon(),
-        { MARKER_TITLE },
-        { _, _ ->
-            val editor = PsiEditorUtil.findEditor(element)
-            if (editor != null) {
-                popupRenderer.showActionsPopup(editor, sqlSyntaxTree)
-            }
-        },
-        GutterIconRenderer.Alignment.RIGHT,
-        { MARKER_ACCESSIBILITY_DESCRIPTION }
-    )
+    private fun buildLineMarkerInfo(element: PsiElement, sqlSyntaxTree: SqlSyntaxTree) =
+        LineMarkerInfo(
+            element,
+            element.textRange,
+            getThemeAwareIcon(),
+            { PluginUI.NAME },
+            { _, _ ->
+                val editor = PsiEditorUtil.findEditor(element)
+                if (editor != null) {
+                    popupRenderer.showActionsPopup(editor, sqlSyntaxTree)
+                }
+            },
+            GutterIconRenderer.Alignment.RIGHT,
+            { MARKER_ACCESSIBILITY_DESCRIPTION }
+        )
 
     private fun getThemeAwareIcon(): Icon {
         return if (!UIUtil.isUnderDarcula()) {
