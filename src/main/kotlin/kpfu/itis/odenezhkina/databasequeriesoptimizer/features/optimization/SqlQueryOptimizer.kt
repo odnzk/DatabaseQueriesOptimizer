@@ -45,7 +45,7 @@ class SqlQueryOptimizerImpl(
     override fun optimize(sql: String): OptimizationResult {
         return try {
             val settingsState = PluginSettings.getInstance().state
-            val scheme = databaseSchemeLoader.loadRoomSchemeAndConvertItToCalcite(settingsState.databaseSchemePath)
+            val scheme = databaseSchemeLoader.loadRoomSchemeAndConvertItToCalcite(settingsState.specificSchemeVersionPath)
                 ?: return OptimizationResult.Error(IllegalStateException("Cannot parse room scheme, check settings"))
             val config: FrameworkConfig = Frameworks
                 .newConfigBuilder()

@@ -11,12 +11,6 @@
         <editorFactoryListener implementation="kpfu.itis.odenezhkina.databasequeriesoptimizer.di.DatabaseQueriesOptimizerEditorFactoryListener"/>
         <postStartupActivity implementation="kpfu.itis.odenezhkina.databasequeriesoptimizer.di.DatabaseQueriesOptimizerStartActivity"/>
         <applicationService serviceImplementation="kpfu.itis.odenezhkina.databasequeriesoptimizer.features.settings.PluginSettings" />
+        <applicationConfigurable id="SQL Optimizer Settings" displayName="SQL Optimizer" instance="kpfu.itis.odenezhkina.databasequeriesoptimizer.features.settings.PluginSettingsUI"/>
     </extensions>
-    <actions>
-        <action id="SqlAction"
-            class="kpfu.itis.odenezhkina.databasequeriesoptimizer.plugin.SqlAction"
-            text="DatabaseQueriesOptimizer">
-            <add-to-group group-id="InspectCodeGroup" anchor="first" />
-        </action>
-    </actions>
 </idea-plugin>
