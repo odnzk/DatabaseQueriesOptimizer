@@ -2,7 +2,8 @@ package kpfu.itis.odenezhkina.databasequeriesoptimizer.features.optimization
 
 import com.intellij.openapi.diagnostic.Logger
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.optimization.SqlQueryOptimizer.OptimizationResult
-import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.scheme.DatabaseSchemeLoader
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.schema.CalciteSchemaMapper
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.schema.RoomSchemaParser
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.settings.PluginSettings
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.settings.data
 import org.apache.calcite.plan.ConventionTraitDef
@@ -20,27 +21,11 @@ import org.apache.calcite.tools.Frameworks
 import org.apache.calcite.tools.Planner
 import org.apache.calcite.tools.RuleSets
 
-interface SqlQueryOptimizer {
-    sealed interface OptimizationResult {
-        class Success(val optimized: String) : OptimizationResult
-        data object Empty : OptimizationResult
-        class Error(val e: Throwable) : OptimizationResult
-    }
-
-    fun optimize(sql: String): OptimizationResult
-
-    companion object {
-        fun create(): SqlQueryOptimizer =
-            SqlQueryOptimizerImpl(
-                logger = Logger.getInstance(SqlQueryOptimizerImpl::class.java),
-                databaseSchemeLoader = DatabaseSchemeLoader()
-            )
-    }
-}
 
 class SqlQueryOptimizerImpl(
     private val logger: Logger,
-    private val databaseSchemeLoader: DatabaseSchemeLoader
+    private val roomSchemaParser: RoomSchemaParser,
+    private val calciteSchemaMapper: CalciteSchemaMapper
 ) : SqlQueryOptimizer {
 
     override fun optimize(sql: String): OptimizationResult {
@@ -55,9 +40,13 @@ class SqlQueryOptimizerImpl(
                     IllegalStateException("No database scheme version: set it in plugin settings")
                 )
             val fullSchemePath = "${schemeDirectory}/${schemeVersion}.json"
-            val scheme = databaseSchemeLoader
-                .loadRoomSchemeAndConvertItToCalcite(fullSchemePath)
+            val roomSchema = roomSchemaParser.parse(fullSchemePath).getOrNull()
                 ?: return OptimizationResult.Error(IllegalStateException("Cannot parse room scheme, check settings"))
+
+            val scheme = calciteSchemaMapper
+                .mapToCalciteSchema(roomSchema)
+                .getOrNull()
+                ?: return OptimizationResult.Error(IllegalStateException("Invalid room scheme, cannot map it to calcite"))
 
             val sqlParserConfig = SqlParser.config().withCaseSensitive(false)
             val config: FrameworkConfig = Frameworks
@@ -67,10 +56,11 @@ class SqlQueryOptimizerImpl(
                 .traitDefs(listOf(ConventionTraitDef.INSTANCE))
                 .ruleSets(
                     RuleSets.ofList(
-                    CoreRules.FILTER_INTO_JOIN,
-                    CoreRules.JOIN_COMMUTE,
-                    CoreRules.PROJECT_MERGE
-                ))
+                        CoreRules.FILTER_INTO_JOIN,
+                        CoreRules.JOIN_COMMUTE,
+                        CoreRules.PROJECT_MERGE
+                    )
+                )
                 .build()
             val planner: Planner = Frameworks.getPlanner(config)
 
@@ -89,8 +79,10 @@ class SqlQueryOptimizerImpl(
     }
 
 
-
-    private fun convertRelAlgebraRepresentationToSQL(relNode: RelNode, dialect: SqlDialect = CalciteSqlDialect.DEFAULT): String {
+    private fun convertRelAlgebraRepresentationToSQL(
+        relNode: RelNode,
+        dialect: SqlDialect = CalciteSqlDialect.DEFAULT
+    ): String {
         val sqlConverter = RelToSqlConverter(dialect)
         val sqlNode = sqlConverter
             .visitRoot(relNode)
