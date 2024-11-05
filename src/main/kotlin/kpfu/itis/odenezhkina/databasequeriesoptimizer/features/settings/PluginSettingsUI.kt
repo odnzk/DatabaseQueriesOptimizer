@@ -15,7 +15,6 @@ import javax.swing.text.BadLocationException
 import javax.swing.text.DocumentFilter
 import kotlin.properties.Delegates
 
-// /Users/o.denezhkina/AndroidStudioProjects/SqlQueriesTestApplication/app/schemas/kfu.odenezhkina.sqlqueriestestapplication.ui.theme.AppDatabase
 private const val DATABASE_SCHEME_PATH_FIELD_NAME = "Database schemes directory"
 private const val DATABASE_SCHEME_PATH_FIELD_LABEL = "Enter database schemes directory"
 private const val DATABASE_VERSION_FIELD_NAME = "Database version"

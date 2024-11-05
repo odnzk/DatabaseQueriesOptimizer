@@ -11,6 +11,7 @@ import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.visualization.api
 private const val ACTIONS_POPUP_TITLE = "Choose action"
 private const val ACTION_OPTIMIZE_QUERY = "Optimize"
 private const val ACTION_SHOW_SQL_TREE = "Show SQL tree"
+private const val NO_OPTIMIZARION_MESSAGE = "No optimization"
 
 interface PluginActionsPopupRender {
 
@@ -58,8 +59,8 @@ class PluginActionsPopupRenderImpl(
                 val sql = StringBuilder()
                 extractSqlQuery(sqlSyntaxTree.rootNode, sql)
                 val hintText: String =
-                    when (val optimizedQuery = sqlQueryOptimizer.optimize(sql.toString())) {
-                        SqlQueryOptimizer.OptimizationResult.Empty -> "No optimization"
+                    when (val optimizedQuery = sqlQueryOptimizer.optimize(sql.toString().trim())) {
+                        SqlQueryOptimizer.OptimizationResult.Empty -> NO_OPTIMIZARION_MESSAGE
                         is SqlQueryOptimizer.OptimizationResult.Error -> optimizedQuery.e.message.orEmpty()
                         is SqlQueryOptimizer.OptimizationResult.Success -> optimizedQuery.optimized
                     }
@@ -75,7 +76,7 @@ class PluginActionsPopupRenderImpl(
     private fun extractSqlQuery(node: SqlSyntaxTree.TreeNode, builder: StringBuilder) {
         when (node) {
             is SqlSyntaxTree.TreeNode.Leaf -> {
-                builder.append(node.name)
+                builder.append("${node.name} ")
             }
 
             is SqlSyntaxTree.TreeNode.Parent -> {

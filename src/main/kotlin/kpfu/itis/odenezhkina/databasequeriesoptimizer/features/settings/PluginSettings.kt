@@ -23,9 +23,7 @@ class PluginSettings : PersistentStateComponent<PluginSettings.State> {
     }
 
     data class State(
-        val databaseSchemesDirectory: SettingsField<String> = SettingsField.Empty,
-        val databaseVersion: SettingsField<Int> = SettingsField.Empty,
-    ) {
-        val specificSchemeVersionPath = "${databaseSchemesDirectory}/${databaseVersion}.json"
-    }
+        val databaseSchemesDirectory: SettingsField<String> = SettingsField.Value("/Users/o.denezhkina/AndroidStudioProjects/SqlQueriesTestApplication/app/schemas/kfu.odenezhkina.sqlqueriestestapplication.ui.theme.AppDatabase"), // TODO()
+        val databaseVersion: SettingsField<Int> = SettingsField.Value(1), // TODO()
+    )
 }
