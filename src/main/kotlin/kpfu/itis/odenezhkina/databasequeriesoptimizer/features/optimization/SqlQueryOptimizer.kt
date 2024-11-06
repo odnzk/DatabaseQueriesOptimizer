@@ -8,7 +8,6 @@ import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.settings.PluginSe
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.settings.data
 import org.apache.calcite.adapter.enumerable.EnumerableConvention
 import org.apache.calcite.adapter.enumerable.EnumerableRules
-import org.apache.calcite.adapter.enumerable.EnumerableTableScanRule
 import org.apache.calcite.config.Lex
 import org.apache.calcite.plan.ConventionTraitDef
 import org.apache.calcite.plan.volcano.AbstractConverter
@@ -84,7 +83,6 @@ class SqlQueryOptimizerImpl(
                     EnumerableRules.ENUMERABLE_JOIN_RULE,
                     EnumerableRules.ENUMERABLE_TABLE_SCAN_RULE,
                     AbstractConverter.ExpandConversionRule.INSTANCE,
-                    EnumerableTableScanRule.
                 )
             )
             .costFactory(null)
