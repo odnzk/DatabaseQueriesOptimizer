@@ -4,6 +4,9 @@ import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.components.service
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.format.impl.capitalize.KeywordCapitalizationSetting
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.format.impl.intent.IndentationForClassesSetting
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.schema.DatabaseSchemaSetting
 
 @State(name = "SqlPluginSettings", storages = [Storage("SqlPluginSettings.xml")])
 class PluginSettings : PersistentStateComponent<PluginSettings.State> {
@@ -23,7 +26,8 @@ class PluginSettings : PersistentStateComponent<PluginSettings.State> {
     }
 
     data class State(
-        val databaseSchemesDirectory: SettingsField<String> = SettingsField.Value("/Users/o.denezhkina/AndroidStudioProjects/SqlQueriesTestApplication/app/schemas/kfu.odenezhkina.sqlqueriestestapplication.ui.theme.AppDatabase"), // TODO()
-        val databaseVersion: SettingsField<Int> = SettingsField.Value(1), // TODO()
+        val databaseSchemaSetting: DatabaseSchemaSetting = DatabaseSchemaSetting(),
+        val indentationForClassesSetting: IndentationForClassesSetting = IndentationForClassesSetting(),
+        val keywordCapitalizationSetting: KeywordCapitalizationSetting = KeywordCapitalizationSetting(),
     )
 }
