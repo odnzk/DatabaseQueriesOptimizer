@@ -4,9 +4,11 @@ import com.intellij.openapi.options.Configurable
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBPanel
-import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.format.api.FormatterSqlClasses
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.format.api.SQLCommonKeywords
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.format.impl.breakLine.NewLinesForSpecificKeywordsSetting
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.format.impl.breakLine.NewLinesForSpecificKeywordsSettingUi.NEW_LINE_KEYWORDS_CLASSES_LABEL
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.format.impl.capitalize.KeywordCapitalizationSetting
-import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.format.impl.capitalize.KeywordCapitalizationSettingUi.KEYWORDS_CLASSES_LABEL
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.format.impl.capitalize.KeywordCapitalizationSettingUi.CAPITALIZED_KEYWORDS_CLASSES_LABEL
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.format.impl.intent.IndentationForClassesSetting
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.format.impl.intent.IndentationForClassesSettingUi.INDENTATION_LABEL
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.format.impl.intent.IndentationForClassesSettingUi.INDENTED_CLASSES_LABEL
@@ -39,10 +41,12 @@ class PluginSettingsUI : Configurable {
     private var databaseDirectoryField: JTextField by Delegates.notNull()
     private var databaseVersionField: JTextField by Delegates.notNull()
 
-    private var indentedClassesField: JBList<FormatterSqlClasses> by Delegates.notNull()
+    private var indentedClassesField: JBList<SQLCommonKeywords> by Delegates.notNull()
     private var indentationField: JTextField by Delegates.notNull()
 
-    private var keywordsField: JBList<FormatterSqlClasses> by Delegates.notNull()
+    private var keywordsToBeCapitalizedField: JBList<SQLCommonKeywords> by Delegates.notNull()
+
+    private var keywordsToBeFromNewLineField: JBList<SQLCommonKeywords> by Delegates.notNull()
 
     // checks whether the user has made any changes to the settings.
     override fun isModified(): Boolean {
@@ -61,9 +65,15 @@ class PluginSettingsUI : Configurable {
         if (indentationForClassesSetting != savedState.indentationForClassesSetting) return true
 
         val keywordCapitalizationSetting = KeywordCapitalizationSetting(
-            keywords = keywordsField.selectedValuesList.toSet(),
+            keywords = keywordsToBeCapitalizedField.selectedValuesList.toSet(),
         )
-        return keywordCapitalizationSetting != savedState.keywordCapitalizationSetting
+        if(keywordCapitalizationSetting != savedState.keywordCapitalizationSetting) return true
+
+        val newLinesForSpecificKeywordsSetting = NewLinesForSpecificKeywordsSetting(
+            keywords = keywordsToBeFromNewLineField.selectedValuesList.toSet(),
+        )
+
+        return newLinesForSpecificKeywordsSetting != savedState.newLinesForSpecificKeywordsSetting
     }
 
     // saves the settings when the user clicks "OK" or "Apply".
@@ -73,6 +83,7 @@ class PluginSettingsUI : Configurable {
         applyDatabaseSchemaSetting(settings)
         applyIndentationSetting(settings)
         applyKeywordsCapitalizationSetting(settings)
+        applyNewLineAfterSpecificKeywordsSetting(settings)
     }
 
     // reloads the saved settings when the settings page is opened.
@@ -102,8 +113,12 @@ class PluginSettingsUI : Configurable {
             add(indentationField)
             addSpaceBetweenItems()
 
-            add(JLabel(KEYWORDS_CLASSES_LABEL).initLabel())
-            add(keywordsField)
+            add(JLabel(CAPITALIZED_KEYWORDS_CLASSES_LABEL).initLabel())
+            add(keywordsToBeCapitalizedField)
+            addSpaceBetweenItems()
+
+            add(JLabel(NEW_LINE_KEYWORDS_CLASSES_LABEL).initLabel())
+            add(keywordsToBeFromNewLineField)
         }
     }
 
@@ -134,33 +149,31 @@ class PluginSettingsUI : Configurable {
             makeWrapContentAndPushToLeftSide()
         }
 
-        indentedClassesField = JBList(FormatterSqlClasses.entries).apply {
-            selectionMode = ListSelectionModel.MULTIPLE_INTERVAL_SELECTION
-            selectedIndices = mapSelectedValuesToIndexInDisplayedList(
-                settings.indentationForClassesSetting.indentedClasses
-            )
-            makeWrapContentAndPushToLeftSide()
-        }
+        indentedClassesField = createJBList(settings.indentationForClassesSetting.indentedClasses)
         indentationField = JTextField().apply {
             text = settings.indentationForClassesSetting.indentation
             makeWrapContentAndPushToLeftSide()
         }
 
-        keywordsField = JBList(FormatterSqlClasses.entries).apply {
+        keywordsToBeCapitalizedField = createJBList(settings.keywordCapitalizationSetting.keywords)
+
+        keywordsToBeFromNewLineField = createJBList(settings.newLinesForSpecificKeywordsSetting.keywords)
+    }
+
+    private fun createJBList(selectedValues: Set<SQLCommonKeywords>): JBList<SQLCommonKeywords> =
+        JBList(SQLCommonKeywords.entries).apply {
             selectionMode = ListSelectionModel.MULTIPLE_INTERVAL_SELECTION
-            selectedIndices = mapSelectedValuesToIndexInDisplayedList(
-                settings.keywordCapitalizationSetting.keywords
-            )
+            selectedIndices = mapSelectedValuesToIndexInDisplayedList(selectedValues)
             makeWrapContentAndPushToLeftSide()
         }
-    }
+
 
     override fun getDisplayName(): String = ""
 
-    private fun mapSelectedValuesToIndexInDisplayedList(selected: Set<FormatterSqlClasses>): IntArray {
+    private fun mapSelectedValuesToIndexInDisplayedList(selected: Set<SQLCommonKeywords>): IntArray {
         val result = mutableListOf<Int>()
         selected.forEach { selectedItem ->
-            result.add(FormatterSqlClasses.entries.indexOf(selectedItem))
+            result.add(SQLCommonKeywords.entries.indexOf(selectedItem))
         }
         return result.toIntArray()
     }
@@ -259,7 +272,17 @@ class PluginSettingsUI : Configurable {
         settings.loadState(
             settings.state.copy(
                 keywordCapitalizationSetting = KeywordCapitalizationSetting(
-                    keywordsField.selectedValuesList.toSet()
+                    keywordsToBeCapitalizedField.selectedValuesList.toSet()
+                )
+            )
+        )
+    }
+
+    private fun applyNewLineAfterSpecificKeywordsSetting(settings: PluginSettings){
+        settings.loadState(
+            settings.state.copy(
+                newLinesForSpecificKeywordsSetting = NewLinesForSpecificKeywordsSetting(
+                    keywordsToBeCapitalizedField.selectedValuesList.toSet()
                 )
             )
         )

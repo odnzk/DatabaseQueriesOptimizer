@@ -1,23 +1,23 @@
 package kpfu.itis.odenezhkina.databasequeriesoptimizer.features.format.impl.capitalize
 
-import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.format.api.FormatterSqlClasses
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.format.api.SQLCommonKeywords
 
-class KeywordCapitalizationSetting(
-    val keywords: Set<FormatterSqlClasses> = setOf(
-        FormatterSqlClasses.SELECT,
-        FormatterSqlClasses.FROM,
-        FormatterSqlClasses.INSERT,
-        FormatterSqlClasses.UPDATE,
-        FormatterSqlClasses.DELETE,
-        FormatterSqlClasses.JOIN,
-        FormatterSqlClasses.ON,
-        FormatterSqlClasses.GROUP,
-        FormatterSqlClasses.BY,
-        FormatterSqlClasses.ORDER,
-        FormatterSqlClasses.LIMIT
+data class KeywordCapitalizationSetting(
+    val keywords: Set<SQLCommonKeywords> = setOf(
+        SQLCommonKeywords.SELECT,
+        SQLCommonKeywords.FROM,
+        SQLCommonKeywords.INSERT,
+        SQLCommonKeywords.UPDATE,
+        SQLCommonKeywords.DELETE,
+        SQLCommonKeywords.JOIN,
+        SQLCommonKeywords.ON,
+        SQLCommonKeywords.GROUP,
+        SQLCommonKeywords.BY,
+        SQLCommonKeywords.ORDER,
+        SQLCommonKeywords.LIMIT
     )
 )
 
 object KeywordCapitalizationSettingUi {
-    const val KEYWORDS_CLASSES_LABEL = "Select keywords to capitalize"
+    const val CAPITALIZED_KEYWORDS_CLASSES_LABEL = "Select keywords to capitalize"
 }

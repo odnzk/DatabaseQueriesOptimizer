@@ -1,9 +1,9 @@
 package kpfu.itis.odenezhkina.databasequeriesoptimizer.features.format.impl.intent
 
-import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.format.api.FormatterSqlClasses
+import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.format.api.SQLCommonKeywords
 
-class IndentationForClassesSetting(
-    val indentedClasses: Set<FormatterSqlClasses> = setOf(FormatterSqlClasses.WHERE, FormatterSqlClasses.AND, FormatterSqlClasses.OR, FormatterSqlClasses.JOIN),
+data class IndentationForClassesSetting(
+    val indentedClasses: Set<SQLCommonKeywords> = setOf(SQLCommonKeywords.WHERE, SQLCommonKeywords.AND, SQLCommonKeywords.OR, SQLCommonKeywords.JOIN),
     val indentation: String = "  ", // Two spaces for indentation
 )
 
