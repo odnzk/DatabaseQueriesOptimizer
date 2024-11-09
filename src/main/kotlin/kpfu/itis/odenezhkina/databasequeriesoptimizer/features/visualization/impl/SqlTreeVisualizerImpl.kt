@@ -8,7 +8,6 @@ import com.intellij.ui.treeStructure.Tree
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.common.SqlSyntaxTree
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.visualization.api.SqlTreeVisualizer
 import java.awt.BorderLayout
-import java.awt.Color
 import java.awt.Component
 import java.awt.Dimension
 import java.awt.Font
@@ -46,11 +45,13 @@ class SqlTreeVisualizerImpl : SqlTreeVisualizer {
                 buildTreeNodes(rootNodeModel, treeRootNode)
             }
 
-            is SqlSyntaxTree.TreeNode.Parent -> {
+            is SqlSyntaxTree.TreeNode.ParserRuleContext -> {
                 for (child in treeRootNode.children) {
                     buildTreeNodes(rootNodeModel, child)
                 }
             }
+
+            is SqlSyntaxTree.TreeNode.Error -> Unit
         }
 
         return Tree(DefaultTreeModel(rootNodeModel)).apply {
@@ -75,7 +76,7 @@ class SqlTreeVisualizerImpl : SqlTreeVisualizer {
         val currentNode = DefaultMutableTreeNode(node.name)
         parentNode.add(currentNode)
 
-        if (node is SqlSyntaxTree.TreeNode.Parent) {
+        if (node is SqlSyntaxTree.TreeNode.ParserRuleContext) {
             for (child in node.children) {
                 buildTreeNodes(currentNode, child)
             }
@@ -110,12 +111,12 @@ class SqlTreeVisualizerImpl : SqlTreeVisualizer {
             // Customize colors based on node type
             when {
                 nodeName.contains("SELECT") -> {
-                    foreground = Color(0x3A6EA5) // Blue for SQL keywords
+                    foreground = JBColor(0x3A6EA5, 0x3A6EA5) // Blue for SQL keywords
                     icon = IconLoader.getIcon("/icons/find/find@20x20.svg", javaClass)
                 }
 
                 nodeName.contains("TABLE") -> {
-                    foreground = Color(0x8A2BE2) // Purple for table names
+                    foreground = JBColor(0x8A2BE2, 0x8A2BE2) // Purple for table names
                     icon = IconLoader.getIcon(
                         "/icons/table/table.svg",
                         javaClass
@@ -123,7 +124,7 @@ class SqlTreeVisualizerImpl : SqlTreeVisualizer {
                 }
 
                 leaf -> {
-                    foreground = Color(0x2E8B57) // Green for leaf nodes (columns, constants)
+                    foreground = JBColor(0x2E8B57, 0x2E8B57) // Green for leaf nodes (columns, constants)
                     icon = IconLoader.getIcon(
                         "/icons/cwmShare/cwmShare.svg",
                         javaClass

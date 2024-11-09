@@ -5,7 +5,6 @@ import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.optimization.SqlQ
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.schema.CalciteSchemaMapper
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.schema.RoomSchemaParser
 import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.settings.PluginSettings
-import kpfu.itis.odenezhkina.databasequeriesoptimizer.features.settings.data
 import org.apache.calcite.adapter.enumerable.EnumerableConvention
 import org.apache.calcite.adapter.enumerable.EnumerableRules
 import org.apache.calcite.config.Lex
@@ -110,16 +109,12 @@ class SqlQueryOptimizerImpl(
     }
 
     private fun loadSchema(): SchemaPlus {
-        val settingsState = PluginSettings.getInstance().state
-        val schemeDirectory = settingsState.databaseSchemesDirectory.data()
-            ?: error("No database scheme directory: set it in plugin settings")
-        val schemeVersion = settingsState.databaseVersion.data()
-            ?: error("No database scheme version: set it in plugin settings")
-        val fullSchemePath = "${schemeDirectory}/${schemeVersion}.json"
+        val settings = PluginSettings.getInstance().state.databaseSchemaSetting
+        val schemaPath = settings.getPathToDatabaseSchema()
 
-        val schema = cachedSchemas.getOrElse(fullSchemePath){
+        val schema = cachedSchemas.getOrElse(schemaPath){
             val roomSchema = roomSchemaParser
-                .parse(fullSchemePath)
+                .parse(schemaPath)
                 .getOrNull()
                 ?: error("Cannot parse room scheme, check settings")
 
@@ -127,7 +122,7 @@ class SqlQueryOptimizerImpl(
                 .mapToCalciteSchema(roomSchema)
                 .getOrNull()
                 ?: error("Invalid room scheme, cannot map it to calcite")
-            cachedSchemas[fullSchemePath] = schemaPlus
+            cachedSchemas[schemaPath] = schemaPlus
             schemaPlus
         }
         return schema

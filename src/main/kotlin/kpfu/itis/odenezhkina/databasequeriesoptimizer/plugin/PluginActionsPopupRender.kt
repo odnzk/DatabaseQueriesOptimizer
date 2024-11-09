@@ -79,11 +79,13 @@ class PluginActionsPopupRenderImpl(
                 builder.append("${node.name} ")
             }
 
-            is SqlSyntaxTree.TreeNode.Parent -> {
+            is SqlSyntaxTree.TreeNode.ParserRuleContext -> {
                 node.children.forEach { child ->
                     extractSqlQuery(child, builder)
                 }
             }
+
+            else -> Unit
         }
     }
 
